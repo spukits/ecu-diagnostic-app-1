@@ -1,0 +1,146 @@
+{
+  "P0001": {
+    "desc": "Fuel Volume Regulator Control Circuit/Open"
+  },
+  "P0002": {
+    "desc": "Fuel Volume Regulator Control Circuit Range/Performance"
+  },
+  "P0003": {
+    "desc": "Fuel Volume Regulator Control Circuit Low"
+  },
+  "P0004": {
+    "desc": "Fuel Volume Regulator Control Circuit High"
+  },
+  "P0005": {
+    "desc": "Fuel Shutoff Valve 'A' Control Circuit/Open"
+  },
+  "P0006": {
+    "desc": "Fuel Shutoff Valve 'A' Control Circuit Low"
+  },
+  "P0007": {
+    "desc": "Fuel Shutoff Valve 'A' Control Circuit High"
+  },
+  "P0010": {
+    "desc": "Camshaft Position Actuator Circuit (Bank 1)"
+  },
+  "P0011": {
+    "desc": "Camshaft Position - Timing Over-Advanced or System Performance (Bank 1)"
+  },
+  "P0012": {
+    "desc": "Camshaft Position - Timing Over-Retarded (Bank 1)"
+  },
+  "P0020": {
+    "desc": "Camshaft Position Actuator Circuit (Bank 2)"
+  },
+  "P0021": {
+    "desc": "Camshaft Position - Timing Over-Advanced or System Performance (Bank 2)"
+  },
+  "P0030": {
+    "desc": "HO2S Heater Control Circuit (Bank 1 Sensor 1)"
+  },
+  "P0031": {
+    "desc": "HO2S Heater Control Circuit Low (Bank 1 Sensor 1)"
+  },
+  "P0036": {
+    "desc": "HO2S Heater Control Circuit (Bank 1 Sensor 2)"
+  },
+  "P0037": {
+    "desc": "HO2S Heater Control Circuit Low (Bank 1 Sensor 2)"
+  },
+  "P0100": {
+    "desc": "Mass or Volume Air Flow Circuit Malfunction"
+  },
+  "P0101": {
+    "desc": "Mass or Volume Air Flow Circuit Range/Performance Problem"
+  },
+  "P0102": {
+    "desc": "Mass or Volume Air Flow Circuit Low Input"
+  },
+  "P0103": {
+    "desc": "Mass or Volume Air Flow Circuit High Input"
+  },
+  "P0130": {
+    "desc": "O2 Sensor Circuit (Bank 1 Sensor 1)"
+  },
+  "P0131": {
+    "desc": "O2 Sensor Circuit Low Voltage (Bank 1 Sensor 1)"
+  },
+  "P0132": {
+    "desc": "O2 Sensor Circuit High Voltage (Bank 1 Sensor 1)"
+  },
+  "P0171": {
+    "desc": "System Too Lean (Bank 1)"
+  },
+  "P0172": {
+    "desc": "System Too Rich (Bank 1)"
+  },
+  "P0174": {
+    "desc": "System Too Lean (Bank 2)"
+  },
+  "P0175": {
+    "desc": "System Too Rich (Bank 2)"
+  },
+  "P0300": {
+    "desc": "Random/Multiple Cylinder Misfire Detected"
+  },
+  "P0301": {
+    "desc": "Cylinder 1 Misfire Detected"
+  },
+  "P0302": {
+    "desc": "Cylinder 2 Misfire Detected"
+  },
+  "P0325": {
+    "desc": "Knock Sensor Circuit Malfunction"
+  },
+  "P0335": {
+    "desc": "Crankshaft Position Sensor A Circuit Malfunction"
+  },
+  "P0340": {
+    "desc": "Camshaft Position Sensor Circuit Malfunction"
+  },
+  "P0401": {
+    "desc": "Exhaust Gas Recirculation Flow Insufficient Detected"
+  },
+  "P0420": {
+    "desc": "Catalyst System Efficiency Below Threshold (Bank 1)"
+  },
+  "P0430": {
+    "desc": "Catalyst System Efficiency Below Threshold (Bank 2)"
+  },
+  "P0440": {
+    "desc": "Evaporative Emission Control System Malfunction"
+  },
+  "P0442": {
+    "desc": "Evaporative Emission Control System Leak Detected (Small Leak)"
+  },
+  "P0446": {
+    "desc": "Evaporative Emission Control System Vent Control Circuit"
+  },
+  "P0455": {
+    "desc": "Evaporative Emission Control System Leak Detected (Gross Leak)"
+  },
+  "P0500": {
+    "desc": "Vehicle Speed Sensor Malfunction"
+  },
+  "P0562": {
+    "desc": "System Voltage Low"
+  },
+  "P0600": {
+    "desc": "Serial Communication Link Malfunction"
+  },
+  "P0700": {
+    "desc": "Transmission Control System Malfunction"
+  },
+  "P0720": {
+    "desc": "Output Speed Sensor Circuit Malfunction"
+  },
+  "P0750": {
+    "desc": "Shift Solenoid A Malfunction"
+  },
+  "P1000": {
+    "desc": "OBD-II Monitor Testing Not Complete"
+  }
+} 
+
+
+
