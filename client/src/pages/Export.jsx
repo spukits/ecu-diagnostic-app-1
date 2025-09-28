@@ -1,50 +1,71 @@
+// src/pages/Export.jsx
 import { useEffect, useState } from "react";
 import { saveAs } from "file-saver";
 import jsPDF from "jspdf";
 import autoTable from "jspdf-autotable";
 import * as XLSX from "xlsx";
 
+// Settings helpers
+import {
+  brandColor,
+  isTableCompact,
+  textColor,
+  dimTextColor,
+} from "../settings";
+
 export default function Export() {
   const [vinList, setVinList] = useState([]);
   const [selectedVin, setSelectedVin] = useState("");
   const [carData, setCarData] = useState([]);
 
-  // Helper για headers με JWT token
+  // 🎨 UI tokens
+  const primary = brandColor();
+  const compact = isTableCompact();
+  const fg = textColor();
+  const fgDim = dimTextColor();
+
+  // JWT headers
   const getHeaders = () => ({
     "Content-Type": "application/json",
-    "Authorization": "Bearer " + localStorage.getItem("token"),
+    Authorization: "Bearer " + localStorage.getItem("token"),
   });
 
   useEffect(() => {
     fetch("/api/car-diagnostics/history", { headers: getHeaders() })
       .then((res) => res.json())
       .then((data) => {
-        const vins = Array.from(new Set(data.map((entry) => entry.vin)));
+        const vins = Array.from(new Set((data || []).map((e) => e.vin)));
         setVinList(vins);
-      });
+      })
+      .catch(() => setVinList([]));
     // eslint-disable-next-line
   }, []);
 
   useEffect(() => {
     if (!selectedVin) return;
-    // Διόρθωση: Σωστό query param (carId για να παίζει και σε εσένα!)
-    fetch(`/api/car-diagnostics/history?carId=${selectedVin}`, { headers: getHeaders() })
+    fetch(`/api/car-diagnostics/history?carId=${selectedVin}`, {
+      headers: getHeaders(),
+    })
       .then((res) => res.json())
-      .then((data) => setCarData(data.reverse()));
+      .then((data) => setCarData((Array.isArray(data) ? data : []).reverse()))
+      .catch(() => setCarData([]));
     // eslint-disable-next-line
   }, [selectedVin]);
 
+  // ===== Exports =====
   const exportExcel = () => {
     if (!carData.length) return;
-    const worksheet = XLSX.utils.json_to_sheet(carData);
-    const workbook = XLSX.utils.book_new();
-    XLSX.utils.book_append_sheet(workbook, worksheet, "Diagnostics");
-
-    const excelBuffer = XLSX.write(workbook, { bookType: "xlsx", type: "array" });
-    const blob = new Blob([excelBuffer], {
-      type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
-    });
-    saveAs(blob, `${selectedVin}_diagnostics.xlsx`);
+    const ws = XLSX.utils.json_to_sheet(carData);
+    const wb = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(wb, ws, "Diagnostics");
+    const buf = XLSX.write(wb, { bookType: "xlsx", type: "array" });
+    saveAs(
+      new Blob([buf], {
+        type:
+          "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+      }),
+      `${selectedVin}_diagnostics.xlsx`
+    );
   };
 
   const exportJSON = () => {
@@ -61,26 +82,38 @@ export default function Export() {
     doc.setFontSize(14);
     doc.text(`Vehicle Diagnostics - VIN: ${selectedVin}`, 14, 15);
 
-    const headers = [[
-      "Date", "RPM", "Speed", "Engine Temp", "Fuel Level", "Throttle",
-      "Engine Load", "Intake Pressure", "Air Temp", "Runtime", "Fuel Pressure",
-      "Check Engine", "DTCs"
-    ]];
+    const headers = [
+      [
+        "Date",
+        "RPM",
+        "Speed",
+        "Engine Temp",
+        "Fuel Level",
+        "Throttle",
+        "Engine Load",
+        "Intake Pressure",
+        "Air Temp",
+        "Runtime",
+        "Fuel Pressure",
+        "Check Engine",
+        "DTCs",
+      ],
+    ];
 
-    const rows = carData.map((item) => [
-      new Date(item.timestamp).toISOString().replace("T", " ").slice(0, 19),
-      item.rpm,
-      item.speed,
-      item.engineTemp,
-      item.fuelLevel,
-      item.throttle,
-      item.engineLoad,
-      item.intakePressure,
-      item.intakeAirTemp,
-      item.engineRuntime,
-      item.fuelPressure,
-      item.milStatus ? "ON" : "OFF",
-      item.dtcs && item.dtcs.length ? item.dtcs.join(", ") : "None"
+    const rows = carData.map((it) => [
+      new Date(it.timestamp).toISOString().replace("T", " ").slice(0, 19),
+      it.rpm,
+      it.speed,
+      it.engineTemp,
+      it.fuelLevel,
+      it.throttle,
+      it.engineLoad,
+      it.intakePressure,
+      it.intakeAirTemp,
+      it.engineRuntime,
+      it.fuelPressure,
+      it.milStatus ? "ON" : "OFF",
+      it.dtcs?.length ? it.dtcs.join(", ") : "None",
     ]);
 
     autoTable(doc, {
@@ -95,20 +128,20 @@ export default function Export() {
   };
 
   return (
-    <div className="max-w-4xl mx-auto p-6 space-y-6">
-      <h1 className="text-3xl font-bold text-center text-gray-800">
-        📤 Εξαγωγή Δεδομένων Οχήματος
-      </h1>
+    <div className={`page-wrap space-y-6 ${compact ? "text-sm" : "text-base"}`}>
+      <h1 className="title text-center">📤 Εξαγωγή Δεδομένων Οχήματος</h1>
 
+      {/* Επιλογή VIN */}
       <div className="text-center space-y-4">
         <select
           value={selectedVin}
           onChange={(e) => setSelectedVin(e.target.value)}
-          className="p-2 border rounded w-full max-w-xs"
+          className={`${compact ? "px-2 py-1" : "p-2"} border rounded w-full max-w-xs bg-transparent`}
+          style={{ borderColor: `${primary}33`, color: fg }}
         >
           <option value="">-- Επιλέξτε VIN --</option>
           {vinList.map((vin) => (
-            <option key={vin} value={vin}>
+            <option key={vin} value={vin} style={{ color: "#000" }}>
               {vin}
             </option>
           ))}
@@ -116,31 +149,60 @@ export default function Export() {
 
         {selectedVin && (
           <div className="space-y-3">
-            <p className="text-sm text-gray-600">Καταγραφές: {carData.length}</p>
-            <button
-              onClick={exportExcel}
-              className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded"
-            >
-              Εξαγωγή σε Excel
-            </button>
-            <button
-              onClick={exportJSON}
-              className="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded ml-2"
-            >
-              Εξαγωγή σε JSON
-            </button>
-            <button
-              onClick={exportPDF}
-              className="bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded ml-2"
-            >
-              Εξαγωγή σε PDF
-            </button>
+            <p className="muted">
+              Καταγραφές: <span style={{ color: fg }}>{carData.length}</span>
+            </p>
+
+            <div className="flex flex-wrap items-center justify-center gap-2">
+              <button
+                onClick={exportExcel}
+                className={`btn ${compact ? "px-3 py-1.5" : "px-4 py-2"}`}
+                style={{
+                  borderColor: `${primary}66`,
+                  background: `color-mix(in oklab, ${primary} 14%, transparent)`,
+                  color: fg,
+                }}
+              >
+                Εξαγωγή σε Excel
+              </button>
+
+              <button
+                onClick={exportJSON}
+                className={`btn ${compact ? "px-3 py-1.5" : "px-4 py-2"}`}
+                style={{
+                  borderColor: `${primary}66`,
+                  background: `color-mix(in oklab, ${primary} 14%, transparent)`,
+                  color: fg,
+                }}
+              >
+                Εξαγωγή σε JSON
+              </button>
+
+              <button
+                onClick={exportPDF}
+                className={`btn ${compact ? "px-3 py-1.5" : "px-4 py-2"}`}
+                style={{
+                  borderColor: `${primary}66`,
+                  background: `color-mix(in oklab, ${primary} 14%, transparent)`,
+                  color: fg,
+                }}
+              >
+                Εξαγωγή σε PDF
+              </button>
+            </div>
           </div>
         )}
       </div>
+
+      {/* (προαιρετικά) preview / summary κάρτα */}
+      {selectedVin && (
+        <div className="card" style={{ border: `1px solid ${primary}1a` }}>
+          <div className="flex items-center justify-between">
+            <div className="font-semibold">VIN: {selectedVin}</div>
+            <div className="muted text-sm">Σύνολο εγγραφών: {carData.length}</div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
-
-
-

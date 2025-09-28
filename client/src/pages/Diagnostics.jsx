@@ -1,5 +1,13 @@
 import React, { useEffect, useState } from "react";
-import dtcCodes from "../pages/dtcCodes.json"; // Εδώ κάνεις import το json με όλους τους DTC και τις περιγραφές τους
+import dtcCodes from "../pages/dtcCodes.json";
+
+// ✅ Settings helpers
+import {
+  brandColor,
+  isTableCompact,
+  textColor,
+  dimTextColor,
+} from "../settings";
 
 export default function Diagnostics() {
   const [vinList, setVinList] = useState([]);
@@ -7,35 +15,38 @@ export default function Diagnostics() {
   const [dtcHistory, setDtcHistory] = useState([]);
   const [loading, setLoading] = useState(false);
 
-  // Βοηθητική συνάρτηση για να βάζεις σωστά το token στο request
+  // 🎨 Settings tokens
+  const primary = brandColor();
+  const compact = isTableCompact();
+  const fg = textColor();
+  const fgDim = dimTextColor();
+
   const getHeaders = () => ({
     "Content-Type": "application/json",
-    "Authorization": "Bearer " + localStorage.getItem("token"),
+    Authorization: "Bearer " + localStorage.getItem("token"),
   });
 
-  // Φέρε όλα τα VIN από τις καταγραφές του χρήστη, μόνο την πρώτη φορά
   useEffect(() => {
     fetch("/api/car-diagnostics/history", { headers: getHeaders() })
-      .then(res => res.json())
-      .then(data => {
-        // Εξάγουμε όλα τα μοναδικά VIN που υπάρχουν στις καταγραφές
-        const vins = Array.from(new Set(data.map(entry => entry.vin)));
+      .then((res) => res.json())
+      .then((data) => {
+        const vins = Array.from(new Set(data.map((entry) => entry.vin)));
         setVinList(vins);
       });
     // eslint-disable-next-line
   }, []);
 
-  // Όταν αλλάζεις VIN, φέρε το ιστορικό DTC αυτού του οχήματος
   useEffect(() => {
     if (!selectedVin) return;
     setLoading(true);
-    fetch(`/api/car-diagnostics/history?carId=${selectedVin}`, { headers: getHeaders() })
-      .then(res => res.json())
-      .then(data => {
-        // Φιλτράρουμε μόνο όσα έχουν ενεργά σφάλματα ή αναμμένο MIL
+    fetch(`/api/car-diagnostics/history?carId=${selectedVin}`, {
+      headers: getHeaders(),
+    })
+      .then((res) => res.json())
+      .then((data) => {
         const filtered = data
           .filter(
-            entry =>
+            (entry) =>
               entry.milStatus === true ||
               (Array.isArray(entry.dtcs) && entry.dtcs.length > 0)
           )
@@ -48,76 +59,94 @@ export default function Diagnostics() {
   }, [selectedVin]);
 
   return (
-    <div className="max-w-4xl mx-auto p-6 space-y-6">
-      {/* Τίτλος σελίδας */}
-      <h1 className="text-3xl font-bold text-center text-gray-800">
-        <span role="img" aria-label="diagnostics">🛠️</span> Διαγνωστικά Οχήματος (Ιστορικό Προβλημάτων)
+    <div className={`page-wrap space-y-6 ${compact ? "text-sm" : "text-base"}`}>
+      <h1
+        className="title text-center"
+        style={{ color: fg }}
+      >
+        🛠️ Διαγνωστικά Οχήματος (Ιστορικό Προβλημάτων)
       </h1>
 
-      {/* Επιλογή VIN από drop-down */}
+      {/* Επιλογή VIN */}
       <div className="space-y-4 text-center">
         <select
           value={selectedVin}
-          onChange={e => setSelectedVin(e.target.value)}
-          className="p-2 border rounded w-full max-w-xs"
+          onChange={(e) => setSelectedVin(e.target.value)}
+          className={`${compact ? "px-2 py-1" : "p-2"} border rounded`}
+          style={{
+            borderColor: `${primary}33`,
+            color: fg,
+            background: "transparent",
+          }}
         >
           <option value="">-- Επιλέξτε VIN --</option>
-          {vinList.map(vin => (
-            <option key={vin} value={vin}>{vin}</option>
+          {vinList.map((vin) => (
+            <option key={vin} value={vin} style={{ color: "#000" }}>
+              {vin}
+            </option>
           ))}
         </select>
       </div>
 
-      {loading && <p className="text-center">⏳ Φόρτωση...</p>}
+      {loading && <p className="text-center muted">⏳ Φόρτωση...</p>}
 
-      {/* Τα αποτελέσματα (αν έχεις επιλέξει VIN) */}
       {!loading && selectedVin && (
         <div>
           {dtcHistory.length === 0 ? (
-            <div className="text-center text-green-600">
+            <div className="text-center" style={{ color: "#22c55e" }}>
               ✅ Δεν βρέθηκαν σφάλματα στις καταγραφές αυτού του οχήματος.
             </div>
           ) : (
             <div className="space-y-4">
-              <h2 className="text-lg font-semibold text-center">
+              <h2
+                className="text-lg font-semibold text-center"
+                style={{ color: fg }}
+              >
                 Βρέθηκαν {dtcHistory.length} στιγμές με ενεργά σφάλματα:
               </h2>
-              <div className="space-y-4">
-                {dtcHistory.map((entry, idx) => (
+              {dtcHistory.map((entry, idx) => (
+                <div
+                  key={entry._id || idx}
+                  className="rounded p-4 shadow"
+                  style={{
+                    background: `${primary}0d`,
+                    border: `1px solid ${primary}33`,
+                    color: fg,
+                  }}
+                >
                   <div
-                    key={entry._id || idx}
-                    className="bg-red-50 border border-red-200 rounded p-4 shadow"
+                    className="flex flex-wrap gap-4 items-center"
+                    style={{ color: fgDim }}
                   >
-                    <div className="flex flex-wrap gap-4 text-sm items-center">
-                      <div>
-                        <strong>🕒 Ημερομηνία:</strong>{" "}
-                        {new Date(entry.timestamp).toLocaleString("el-GR")}
-                      </div>
-                      <div>
-                        <strong>⚠️ MIL:</strong>{" "}
-                        {entry.milStatus ? "ON" : "OFF"}
-                      </div>
+                    <div>
+                      <strong style={{ color: fg }}>🕒 Ημερομηνία:</strong>{" "}
+                      {new Date(entry.timestamp).toLocaleString("el-GR")}
                     </div>
-                    <div className="mt-2">
-                      <strong>🚨 DTC Σφάλματα:</strong>
-                      {entry.dtcs && entry.dtcs.length > 0 ? (
-                        <ul className="list-disc ml-6">
-                          {entry.dtcs.map((dtc, i) => (
-                            <li key={i}>
-                              <b>{dtc}</b>
-                              {" — "}
-                              {/* Εμφανίζουμε την περιγραφή αν υπάρχει στο json, αλλιώς "Άγνωστο σφάλμα" */}
-                              {dtcCodes[dtc]?.desc || "Άγνωστο σφάλμα"}
-                            </li>
-                          ))}
-                        </ul>
-                      ) : (
-                        <span> Κανένα συγκεκριμένο κωδικό</span>
-                      )}
+                    <div>
+                      <strong style={{ color: fg }}>⚠️ MIL:</strong>{" "}
+                      {entry.milStatus ? "ON" : "OFF"}
                     </div>
                   </div>
-                ))}
-              </div>
+                  <div className="mt-2">
+                    <strong style={{ color: fg }}>🚨 DTC Σφάλματα:</strong>
+                    {entry.dtcs && entry.dtcs.length > 0 ? (
+                      <ul className="list-disc ml-6">
+                        {entry.dtcs.map((dtc, i) => (
+                          <li key={i} style={{ color: fg }}>
+                            <b>{dtc}</b> —{" "}
+                            {dtcCodes[dtc]?.desc || "Άγνωστο σφάλμα"}
+                          </li>
+                        ))}
+                      </ul>
+                    ) : (
+                      <span style={{ color: fgDim }}>
+                        {" "}
+                        Κανένα συγκεκριμένο κωδικό
+                      </span>
+                    )}
+                  </div>
+                </div>
+              ))}
             </div>
           )}
         </div>
@@ -125,4 +154,3 @@ export default function Diagnostics() {
     </div>
   );
 }
-

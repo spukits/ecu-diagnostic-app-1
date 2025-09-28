@@ -1,0 +1,106 @@
+{
+  "settings": {
+    "title": "Settings",
+    "language_label": "Interface language",
+    "language_hint": "Changes apply immediately across the app.",
+    "theme_label": "App theme",
+    "theme_hint": "Switch between Light and Dark.",
+    "light": "Light",
+    "dark": "Dark"
+  },
+  "common": {
+    "save": "Save",
+    "cancel": "Cancel",
+    "on": "ON",
+    "off": "OFF"
+  },
+  "auth": {
+    "register": {
+      "title": "User Registration",
+      "username_placeholder": "Username",
+      "email_placeholder": "Email",
+      "password_placeholder": "Password",
+      "submit": "Register",
+      "success": "✅ Registration successful! Redirecting to login...",
+      "error_generic": "Registration error",
+      "error_with_reason": "❌ {{reason}}",
+      "server_error": "❌ Could not connect to the server."
+    },
+    "login": {
+      "title": "User Login",
+      "email_placeholder": "Email",
+      "password_placeholder": "Password",
+      "submit": "Log in",
+      "success": "✅ Login successful! Redirecting to home...",
+      "error_generic": "Login error",
+      "server_error": "❌ Could not connect to the server.",
+      "no_account": "Don’t have an account?",
+      "register_link": "Register"
+    }
+  },
+  "home": {
+    "categories": {
+      "dashboard": "Dashboard",
+      "live": "Live Data",
+      "diagnostics": "Diagnostics",
+      "history": "History",
+      "export": "Export Data",
+      "settings": "Settings"
+    },
+    "login_required": "Log in to access",
+    "welcome": "Welcome, {{name}}",
+    "logout": "Log out"
+  },
+  "history": {
+    "title": "📚 Vehicle Records History",
+    "search_placeholder": "Search VIN...",
+    "date_tooltip": "Date filter (YYYY-MM-DD)",
+    "empty_filtered": "No records match your filters.",
+    "delete": "Delete",
+    "delete_title": "Delete record",
+    "confirm_delete": "Are you sure you want to delete this record?",
+    "recorded_at": "Recorded",
+    "none": "None",
+    "charts": {
+      "rpm": "RPM",
+      "speed": "Speed",
+      "temp": "Temperature",
+      "fuel_pressure": "Fuel Pressure"
+    },
+    "labels": {
+      "vin": "VIN",
+      "time": "Time",
+      "rpm": "RPM",
+      "speed": "Speed",
+      "engine_temp": "Engine Temperature",
+      "fuel_level": "Fuel",
+      "fuel_pressure": "Fuel Pressure",
+      "throttle": "Throttle Position",
+      "engine_load": "Engine Load",
+      "intake_pressure": "Intake Pressure",
+      "intake_air_temp": "Intake Air Temp",
+      "runtime": "Runtime",
+      "check_engine": "Check Engine",
+      "dtcs": "DTCs"
+    },
+    "export": {
+      "csv": "Export CSV",
+      "pdf": "Export PDF",
+      "csv_title": "Export to CSV",
+      "pdf_title": "Export to PDF",
+      "csv_filename": "history.csv",
+      "pdf_filename": "history.pdf"
+    },
+    "errors": {
+      "load_history": "History load error:",
+      "delete_record": "Delete record error:"
+    }
+  },
+  "units": {
+    "kmh": "km/h",
+    "celsius": "°C",
+    "kpa": "kPa",
+    "percent": "%",
+    "seconds": "sec"
+  }
+}

@@ -1,3 +1,4 @@
+// src/pages/History.jsx
 import { useEffect, useState } from "react";
 import {
   LineChart,
@@ -8,35 +9,52 @@ import {
   CartesianGrid,
   ResponsiveContainer,
 } from "recharts";
-import { saveAs } from "file-saver";
-import jsPDF from "jspdf";
+
+// Settings helpers
+import {
+  brandColor,
+  chartAnimate,
+  isTableCompact,
+  textColor,
+  dimTextColor,
+} from "../settings";
 
 export default function History() {
   const [history, setHistory] = useState([]);
   const [search, setSearch] = useState("");
   const [dateFilter, setDateFilter] = useState("");
 
-  // Παίρνω τα headers με το JWT token για κάθε request προς το backend
+  // UI tokens από Settings
+  const primary = brandColor();
+  const animate = chartAnimate();
+  const compact = isTableCompact();
+  const axisColor = textColor();
+  const gridColor = dimTextColor();
+
   const getHeaders = () => ({
     "Content-Type": "application/json",
-    "Authorization": "Bearer " + localStorage.getItem("token"),
+    Authorization: "Bearer " + localStorage.getItem("token"),
   });
 
-  // Φόρτωση όλου του ιστορικού με το που ανοίγει η σελίδα
+  const formatDateTime = (d) =>
+    new Date(d).toLocaleString(undefined, {
+      year: "numeric",
+      month: "2-digit",
+      day: "2-digit",
+      hour: "2-digit",
+      minute: "2-digit",
+    });
+
   useEffect(() => {
-    fetch("/api/car-diagnostics/history", {
-      headers: getHeaders(),
-    })
+    fetch("/api/car-diagnostics/history", { headers: getHeaders() })
       .then((res) => res.json())
-      // Φέρνω το πιο πρόσφατο πρώτο (αντίστροφη σειρά)
       .then((data) => setHistory(data.reverse()))
-      .catch((err) => console.error("Σφάλμα ιστορικού:", err));
+      .catch((err) => console.error("Αποτυχία φόρτωσης ιστορικού", err));
     // eslint-disable-next-line
   }, []);
 
-  // Διαγραφή μίας καταγραφής
   const deleteOne = async (id) => {
-    if (!window.confirm("Είσαι σίγουρος ότι θέλεις να διαγράψεις αυτή την καταγραφή;")) return;
+    if (!window.confirm("Διαγραφή καταγραφής;")) return;
     try {
       const res = await fetch(`/api/car-diagnostics/history/${id}`, {
         method: "DELETE",
@@ -46,11 +64,10 @@ export default function History() {
         setHistory((prev) => prev.filter((item) => item._id !== id));
       }
     } catch (err) {
-      console.error("Σφάλμα διαγραφής εγγραφής:", err);
+      console.error("Σφάλμα διαγραφής καταγραφής", err);
     }
   };
 
-  // Φιλτράρισμα ιστορικού με βάση VIN & ημερομηνία
   const filteredHistory = history.filter((car) => {
     const matchesSearch = (car?.vin || "")
       .toLowerCase()
@@ -61,101 +78,74 @@ export default function History() {
     return matchesSearch && matchesDate;
   });
 
-  // Για εξαγωγή CSV/PDF αν τα ξαναχρειαστείς
-  const exportCSV = () => {
-    const headers = Object.keys(history[0] || {}).join(",");
-    const rows = history.map((item) => Object.values(item).join(",")).join("\n");
-    const csv = `${headers}\n${rows}`;
-    const blob = new Blob([csv], { type: "text/csv;charset=utf-8;" });
-    saveAs(blob, "history.csv");
-  };
-
-  const exportPDF = () => {
-    const doc = new jsPDF();
-    history.forEach((car, i) => {
-      let top = 10 + i * 80;
-      if (top > 270) {
-        doc.addPage();
-        top = 10;
-      }
-      doc.setFontSize(10);
-      doc.text(`VIN: ${car.vin}`, 10, top);
-      doc.text(
-        `Χρόνος: ${new Date(car.timestamp).toLocaleString()}`,
-        10,
-        top + 5
-      );
-      doc.text(
-        `RPM: ${car.rpm} | Speed: ${car.speed} km/h | Temp: ${car.engineTemp}°C`,
-        10,
-        top + 10
-      );
-      doc.text(
-        `Fuel: ${car.fuelLevel}% | Fuel Pressure: ${car.fuelPressure} kPa`,
-        10,
-        top + 15
-      );
-      doc.text(
-        `Throttle: ${car.throttle}% | Load: ${car.engineLoad}%`,
-        10,
-        top + 20
-      );
-    });
-    doc.save("history.pdf");
-  };
-
   return (
-    <div className="p-4 max-w-6xl mx-auto space-y-6">
-      <h2 className="text-3xl font-bold text-center text-gray-800">
-        📚 Ιστορικό Καταγραφών Οχήματος
-      </h2>
+    <div className={`page-wrap space-y-6 ${compact ? "text-sm" : "text-base"}`}>
+      <h2 className="title text-center">Ιστορικό Καταγραφών</h2>
 
-      {/* Αναζήτηση και φίλτρα */}
-      <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4 mb-6">
-        <input
-          type="text"
-          placeholder="Αναζήτηση VIN..."
-          className="border px-3 py-2 rounded w-full md:w-1/2"
-          value={search}
-          onChange={(e) => setSearch(e.target.value)}
-        />
-        <input
-          type="date"
-          className="border px-3 py-2 rounded w-full md:w-1/3"
-          value={dateFilter}
-          onChange={(e) => setDateFilter(e.target.value)}
-        />
+      {/* Αναζήτηση & Φίλτρα */}
+      <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4 mb-2">
+        <div className="flex-1 flex gap-3">
+          <input
+            type="text"
+            placeholder="Αναζήτηση με VIN…"
+            className={`border rounded bg-transparent outline-none ${
+              compact ? "px-2 py-1" : "px-3 py-2"
+            } w-full md:w-1/2`}
+            style={{ borderColor: `${primary}33`, color: axisColor }}
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+          />
+          <input
+            type="date"
+            className={`border rounded bg-transparent outline-none ${
+              compact ? "px-2 py-1" : "px-3 py-2"
+            } w-full md:w-1/3`}
+            style={{ borderColor: `${primary}33`, color: axisColor }}
+            value={dateFilter}
+            onChange={(e) => setDateFilter(e.target.value)}
+            title="Φίλτρο ημερομηνίας"
+          />
+        </div>
       </div>
 
-      {/* Μήνυμα αν δεν υπάρχουν καταγραφές */}
+      {/* Empty state */}
       {filteredHistory.length === 0 ? (
-        <p className="text-center text-gray-600">
-          Δεν υπάρχουν καταγραφές για τα φίλτρα που δώσατε.
+        <p className="text-center muted">
+          Δεν βρέθηκαν καταγραφές με τα τρέχοντα φίλτρα.
         </p>
       ) : (
         [...filteredHistory].reverse().map((car, index) => (
           <div
             key={index}
-            className="p-6 bg-white rounded-lg shadow-md border border-gray-200 space-y-3"
+            className="card space-y-3"
+            style={{ border: `1px solid ${primary}1a` }}
           >
-            {/* Πάνω μέρος: VIN και κουμπί διαγραφής */}
+            {/* Header */}
             <div className="flex flex-col md:flex-row md:justify-between md:items-center">
               <div>
                 <p className="text-lg font-semibold">VIN: {car.vin}</p>
-                <p className="text-sm text-gray-500">
-                  Καταγραφή: {new Date(car.timestamp).toLocaleString()}
+                <p className="muted text-sm">
+                  Καταγράφηκε: {formatDateTime(car.timestamp)}
                 </p>
               </div>
               <button
                 onClick={() => deleteOne(car._id)}
-                className="mt-2 md:mt-0 bg-red-500 hover:bg-red-600 text-white text-sm px-3 py-1 rounded"
+                className={`rounded text-white text-sm ${
+                  compact ? "px-3 py-1.5" : "px-3 py-2"
+                }`}
+                title="Διαγραφή"
+                style={{ backgroundColor: "#ef4444" }}
               >
                 Διαγραφή
               </button>
             </div>
 
-            {/* Πληροφορίες αυτοκινήτου */}
-            <div className="grid grid-cols-2 md:grid-cols-3 gap-4 text-sm text-gray-700">
+            {/* Info grid */}
+            <div
+              className={`grid grid-cols-2 md:grid-cols-3 ${
+                compact ? "gap-3" : "gap-4"
+              } text-sm`}
+            >
               <p>
                 <strong>RPM:</strong> {car.rpm}
               </p>
@@ -163,117 +153,78 @@ export default function History() {
                 <strong>Ταχύτητα:</strong> {car.speed} km/h
               </p>
               <p>
-                <strong>Θερμοκρασία Κινητήρα:</strong> {car.engineTemp}°C
+                <strong>Θερμ. κινητήρα:</strong> {car.engineTemp}°C
               </p>
               <p>
                 <strong>Καύσιμο:</strong> {car.fuelLevel}%
               </p>
               <p>
-                <strong>Θέση Πεταλούδας:</strong> {car.throttle}%
+                <strong>Γκάζι:</strong> {car.throttle}%
               </p>
               <p>
-                <strong>Φορτίο Κινητήρα:</strong> {car.engineLoad}%
+                <strong>Φόρτος κινητήρα:</strong> {car.engineLoad}%
               </p>
               <p>
-                <strong>Πίεση Εισαγωγής:</strong> {car.intakePressure} kPa
+                <strong>Πίεση εισαγωγής:</strong> {car.intakePressure} kPa
               </p>
               <p>
-                <strong>Θερμοκρασία Αέρα:</strong> {car.intakeAirTemp}°C
+                <strong>Θερμ. αέρα εισαγωγής:</strong> {car.intakeAirTemp}°C
               </p>
               <p>
-                <strong>Runtime:</strong> {car.engineRuntime} sec
+                <strong>Χρόνος λειτουργίας:</strong> {car.engineRuntime} s
               </p>
               <p>
-                <strong>Πίεση Καυσίμου:</strong> {car.fuelPressure} kPa
+                <strong>Πίεση καυσίμου:</strong> {car.fuelPressure} kPa
               </p>
               <p>
                 <strong>Check Engine:</strong> {car.milStatus ? "ON" : "OFF"}
               </p>
               <p>
                 <strong>DTCs:</strong>{" "}
-                {car.dtcs?.length ? car.dtcs.join(", ") : "Καμία"}
+                {car.dtcs?.length ? car.dtcs.join(", ") : "—"}
               </p>
             </div>
 
-            {/* Τα 4 γραφήματα κάθε φορά για κάθε εγγραφή */}
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4">
-              <div className="h-36">
-                <h4 className="text-sm font-medium text-gray-600 mb-1">📈 RPM</h4>
-                <ResponsiveContainer width="100%" height="100%">
-                  <LineChart data={[car]}>
-                    <XAxis dataKey="timestamp" hide />
-                    <YAxis />
-                    <Tooltip />
-                    <CartesianGrid stroke="#eee" strokeDasharray="5 5" />
-                    <Line
-                      type="monotone"
-                      dataKey="rpm"
-                      stroke="#8884d8"
-                      dot
-                    />
-                  </LineChart>
-                </ResponsiveContainer>
-              </div>
-
-              <div className="h-36">
-                <h4 className="text-sm font-medium text-gray-600 mb-1">
-                  🚗 Ταχύτητα
-                </h4>
-                <ResponsiveContainer width="100%" height="100%">
-                  <LineChart data={[car]}>
-                    <XAxis dataKey="timestamp" hide />
-                    <YAxis />
-                    <Tooltip />
-                    <CartesianGrid stroke="#eee" strokeDasharray="5 5" />
-                    <Line
-                      type="monotone"
-                      dataKey="speed"
-                      stroke="#82ca9d"
-                      dot
-                    />
-                  </LineChart>
-                </ResponsiveContainer>
-              </div>
-
-              <div className="h-36">
-                <h4 className="text-sm font-medium text-gray-600 mb-1">
-                  🌡️ Θερμοκρασία
-                </h4>
-                <ResponsiveContainer width="100%" height="100%">
-                  <LineChart data={[car]}>
-                    <XAxis dataKey="timestamp" hide />
-                    <YAxis />
-                    <Tooltip />
-                    <CartesianGrid stroke="#eee" strokeDasharray="5 5" />
-                    <Line
-                      type="monotone"
-                      dataKey="engineTemp"
-                      stroke="#ff7300"
-                      dot
-                    />
-                  </LineChart>
-                </ResponsiveContainer>
-              </div>
-
-              <div className="h-36">
-                <h4 className="text-sm font-medium text-gray-600 mb-1">
-                  ⛽ Πίεση Καυσίμου
-                </h4>
-                <ResponsiveContainer width="100%" height="100%">
-                  <LineChart data={[car]}>
-                    <XAxis dataKey="timestamp" hide />
-                    <YAxis />
-                    <Tooltip />
-                    <CartesianGrid stroke="#eee" strokeDasharray="5 5" />
-                    <Line
-                      type="monotone"
-                      dataKey="fuelPressure"
-                      stroke="#00c49f"
-                      dot
-                    />
-                  </LineChart>
-                </ResponsiveContainer>
-              </div>
+            {/* Charts */}
+            <div
+              className={`grid grid-cols-1 md:grid-cols-2 ${
+                compact ? "gap-3" : "gap-4"
+              } mt-2`}
+            >
+              {[
+                { key: "rpm", label: "📈 RPM" },
+                { key: "speed", label: "🚗 Ταχύτητα" },
+                { key: "engineTemp", label: "🌡️ Θερμοκρασία" },
+                { key: "fuelPressure", label: "⛽ Πίεση καυσίμου" },
+              ].map(({ key, label }) => (
+                <div key={key} className={compact ? "h-32" : "h-36"}>
+                  <h4 className="text-sm font-medium muted mb-1">{label}</h4>
+                  <ResponsiveContainer width="100%" height="100%">
+                    <LineChart data={[car]}>
+                      <XAxis dataKey="timestamp" hide />
+                      <YAxis stroke={axisColor} />
+                      <Tooltip
+                        wrapperStyle={{
+                          borderColor: `${primary}66`,
+                          color: axisColor,
+                          background: "rgba(17,24,39,0.9)",
+                        }}
+                        labelFormatter={(v) => formatDateTime(v)}
+                      />
+                      <CartesianGrid stroke={gridColor} strokeDasharray="5 5" />
+                      <Line
+                        type="monotone"
+                        dataKey={key}
+                        stroke={primary}
+                        dot
+                        isAnimationActive={animate}
+                        animationDuration={animate ? 650 : 0}
+                        animationEasing="ease-in-out"
+                      />
+                    </LineChart>
+                  </ResponsiveContainer>
+                </div>
+              ))}
             </div>
           </div>
         ))

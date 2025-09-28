@@ -1,3 +1,80 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+/* 🎨 Design tokens */
+:root {
+  /* Theme colors (light) */
+  --bg: #0b1220;
+  --bg-card: #111827;
+  --fg: #e5e7eb;
+  --fg-dim: #9ca3af;
+
+  /* Customizable tokens via Settings */
+  --brand: #00BCD4;      /* αλλάζει από Settings */
+  --font-scale: 1;       /* 0.9–1.1 */
+  --font-weight: 500;    /* 400–700 */
+}
+
+.dark:root {
+  /* Theme colors (dark) */
+  --bg: #060a13;
+  --bg-card: #0f172a;
+  --fg: #d1d5db;
+  --fg-dim: #9ca3af;
+}
+
+/* 🌍 Global base styles */
+@layer base {
+  html, body, #root {
+    height: 100%;
+  }
+
+  body {
+    @apply antialiased;
+    background: var(--bg);
+    color: var(--fg);
+    font-size: calc(16px * var(--font-scale)); /* κλιμάκωση γραμματοσειράς */
+    font-weight: var(--font-weight);           /* βάρος γραμματοσειράς */
+  }
+
+  h1, h2, h3, h4, h5, h6 {
+    font-weight: calc(var(--font-weight) + 100);
+  }
+
+  a {
+    @apply underline-offset-2 hover:underline;
+  }
+}
+
+/* 🧩 Reusable components */
+@layer components {
+  .page-wrap {
+    @apply max-w-6xl mx-auto p-4 md:p-6;
+  }
+
+  .card {
+    background: var(--bg-card);
+    @apply rounded-2xl shadow-md p-4 md:p-6;
+  }
+
+  .title {
+    @apply text-2xl md:text-3xl;
+    font-weight: calc(var(--font-weight) + 200);
+  }
+
+  .muted {
+    color: var(--fg-dim);
+  }
+
+  .btn {
+    @apply inline-flex items-center gap-2 px-4 py-2 rounded-xl border border-white/10 hover:bg-white/5 transition;
+    font-weight: var(--font-weight);
+  }
+
+  /* Brand-aware button */
+  .btn-brand {
+    border-color: color-mix(in oklab, var(--brand) 60%, transparent);
+    background: color-mix(in oklab, var(--brand) 12%, transparent);
+  }
+}

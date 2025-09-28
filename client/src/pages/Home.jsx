@@ -1,20 +1,21 @@
-import { Link, useNavigate } from 'react-router-dom';
-import { useCallback } from 'react';
+// src/pages/Home.jsx
+import { Link, useNavigate } from "react-router-dom";
+import { useCallback } from "react";
 
-// Οι βασικές κατηγορίες/σελίδες που εμφανίζονται στο home με εικονίδια
 const categories = [
-  { name: "Dashboard", path: "/dashboard", icon: "📊" },
-  { name: "Live Δεδομένα", path: "/live", icon: "📈" },
-  { name: "Διαγνωστικά", path: "/diagnostics", icon: "🔧" },
-  { name: "Ιστορικό", path: "/history", icon: "📚" },
-  { name: "Εξαγωγή Δεδομένων", path: "/export", icon: "📤" },
-  { name: "Ρυθμίσεις", path: "/settings", icon: "⚙️" },
+  { title: "Dashboard",    path: "/dashboard",   icon: "📊", desc: "Σύνοψη τελευταίων μετρήσεων" },
+  { title: "Live Data",    path: "/live",        icon: "🛰️", desc: "Ζωντανά OBD-II δεδομένα" },
+  { title: "Diagnostics",  path: "/diagnostics", icon: "🛠️", desc: "DTCs & έλεγχοι" },
+  { title: "History",      path: "/history",     icon: "🗂️", desc: "Αποθηκευμένες καταγραφές" },
+  { title: "Export",       path: "/export",      icon: "📤", desc: "Εξαγωγή σε CSV / PDF" },
+  { title: "Settings",     path: "/settings",    icon: "⚙️", desc: "Θέμα, brand color, προτιμήσεις" }, // ✅ επανήλθε εδώ
 ];
 
 export default function Home() {
   const navigate = useNavigate();
+  const isLoggedIn = !!localStorage.getItem("token");
+  const username = localStorage.getItem("username") || "Χρήστη";
 
-  // Συνάρτηση αποσύνδεσης: Καθαρίζει τα δεδομένα του χρήστη και τον επιστρέφει στη σελίδα login
   const handleLogout = useCallback(() => {
     localStorage.removeItem("token");
     localStorage.removeItem("username");
@@ -22,72 +23,78 @@ export default function Home() {
     navigate("/login");
   }, [navigate]);
 
-  // Ελέγχουμε αν υπάρχει συνδεδεμένος χρήστης (token)
-  const isLoggedIn = !!localStorage.getItem("token");
-  const username = localStorage.getItem("username");
-
   return (
-    <div className="min-h-screen flex flex-col items-center justify-center bg-gray-100 space-y-6">
-      {/* Κεντρικό grid με τα διαθέσιμα "κουτιά" - μενού */}
-      <div className="grid grid-cols-2 gap-4 max-w-lg w-full">
-        {categories.map((cat, i) => (
-          isLoggedIn ? (
-            // Αν ο χρήστης είναι συνδεδεμένος, τα κουτιά είναι clickable και οδηγούν στη σελίδα τους
-            <Link
-              key={i}
-              to={cat.path}
-              className="bg-white shadow-md hover:shadow-xl transition duration-200 p-4 rounded-lg text-center"
-            >
-              <div className="text-4xl">{cat.icon}</div>
-              <div className="mt-2 text-sm font-semibold">{cat.name}</div>
-            </Link>
-          ) : (
-            // Αν ΔΕΝ είναι συνδεδεμένος, τα κουτιά φαίνονται γκρι και δεν πατιούνται
-            <div
-              key={i}
-              className="bg-gray-200 shadow p-4 rounded-lg text-center opacity-50 cursor-not-allowed"
-              title="Συνδέσου για να έχεις πρόσβαση"
-            >
-              <div className="text-4xl">{cat.icon}</div>
-              <div className="mt-2 text-sm font-semibold">{cat.name}</div>
-            </div>
-          )
-        ))}
+    <div className="page-wrap">
+      {/* Καλωσόρισμα */}
+      <div className="card mb-6">
+        <h1 className="title">Καλώς ήρθες, {username}!</h1>
+        <p className="muted mt-2">
+          ECU Diagnostic App — παρακολούθηση, ιστορικό και εξαγωγές OBD-II.
+        </p>
       </div>
 
-      {/* Εμφανίζει μήνυμα χαιρετισμού αν υπάρχει username */}
-      {isLoggedIn && username && (
-        <div className="mt-6 text-gray-700 text-md">
-          Καλωσήρθες, <b>{username}</b>
-        </div>
-      )}
-
-      {/* Αν δεν είναι συνδεδεμένος, δείχνει επιλογές για login/register */}
+      {/* Αν δεν υπάρχει token, CTA για Σύνδεση/Εγγραφή */}
       {!isLoggedIn && (
-        <div className="flex space-x-6 mt-6">
-          <Link
-            to="/login"
-            className="px-4 py-2 rounded text-white bg-blue-600 hover:bg-blue-700 transition"
-          >
-            Σύνδεση
-          </Link>
-          <Link
-            to="/register"
-            className="px-4 py-2 rounded text-white bg-green-600 hover:bg-green-700 transition"
-          >
-            Εγγραφή
-          </Link>
+        <div className="grid gap-4 md:grid-cols-2 mb-6">
+          <div className="card">
+            <h2 className="text-xl font-semibold mb-2">Ξεκίνα</h2>
+            <p className="muted mb-4">
+              Συνδέσου ή δημιούργησε λογαριασμό για να δεις τα δεδομένα σου.
+            </p>
+            <div className="flex gap-2">
+              <Link to="/login" className="btn">Σύνδεση</Link>
+              <Link to="/register" className="btn">Εγγραφή</Link>
+            </div>
+          </div>
+          <div className="card">
+            <h2 className="text-xl font-semibold mb-2">Τι προσφέρει</h2>
+            <ul className="list-disc list-inside muted space-y-1">
+              <li>Ζωντανή ροή OBD-II (RPM, ταχύτητα, θερμοκρασίες κ.ά.)</li>
+              <li>Ιστορικό καταγραφών & mini-charts</li>
+              <li>Εξαγωγές CSV / PDF</li>
+            </ul>
+          </div>
         </div>
       )}
 
-      {/* Προαιρετικά: Κουμπί αποσύνδεσης μόνο αν θες να το έχεις και εδώ κάτω (συνήθως μόνο στο navbar) */}
+      {/* Tiles σελίδων (αν είσαι συνδεδεμένος είναι links, αλλιώς disabled) */}
+      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+        {categories.map((cat) =>
+          isLoggedIn ? (
+            <Link key={cat.path} to={cat.path} className="card hover:shadow-lg transition">
+              <div className="flex items-center justify-between">
+                <h3 className="text-xl font-semibold">{cat.title}</h3>
+                <span className="text-2xl" aria-hidden>{cat.icon}</span>
+              </div>
+              <p className="muted mt-2">{cat.desc}</p>
+              <div className="mt-4">
+                <span className="btn">Μετάβαση</span>
+              </div>
+            </Link>
+          ) : (
+            <div
+              key={cat.path}
+              className="card opacity-60 cursor-not-allowed"
+              title="Απαιτείται σύνδεση"
+            >
+              <div className="flex items-center justify-between">
+                <h3 className="text-xl font-semibold">{cat.title}</h3>
+                <span className="text-2xl" aria-hidden>{cat.icon}</span>
+              </div>
+              <p className="muted mt-2">{cat.desc}</p>
+              <div className="mt-4">
+                <span className="btn">Κλειδωμένο</span>
+              </div>
+            </div>
+          )
+        )}
+      </div>
+
+      {/* (Προαιρετικό) κουμπί αποσύνδεσης */}
       {/* {isLoggedIn && (
-        <button
-          onClick={handleLogout}
-          className="mt-4 px-4 py-2 rounded text-white bg-red-600 hover:bg-red-700 transition"
-        >
-          Αποσύνδεση
-        </button>
+        <div className="mt-6">
+          <button onClick={handleLogout} className="btn">Αποσύνδεση</button>
+        </div>
       )} */}
     </div>
   );

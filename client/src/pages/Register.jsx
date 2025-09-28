@@ -1,3 +1,4 @@
+// src/pages/Register.jsx
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 
@@ -21,19 +22,22 @@ export default function Register() {
       });
       const data = await res.json();
       if (res.ok) {
-        setMessage("✅ Επιτυχής εγγραφή! Μεταφέρεστε στη σελίδα σύνδεσης...");
-        setTimeout(() => navigate("/login"), 1200); // Redirect μετά από 1.2s
+        setMessage("✅ Εγγραφή επιτυχής!"); // Registration successful
+        setTimeout(() => navigate("/login"), 1200);
       } else {
-        setMessage("❌ " + (data.message || "Σφάλμα εγγραφής"));
+        setMessage(`❌ Σφάλμα: ${data.message || "Αποτυχία εγγραφής."}`);
       }
     } catch {
-      setMessage("❌ Πρόβλημα σύνδεσης με τον server.");
+      setMessage("❌ Σφάλμα διακομιστή. Προσπαθήστε ξανά.");
     }
   };
 
   return (
     <div className="max-w-md mx-auto p-6 mt-10 bg-white shadow rounded">
-      <h2 className="text-2xl font-bold mb-6 text-center">Εγγραφή Χρήστη</h2>
+      <h2 className="text-2xl font-bold mb-6 text-center">
+        Εγγραφή Χρήστη
+      </h2>
+
       <form onSubmit={handleSubmit} className="space-y-4">
         <input
           name="username"
@@ -65,6 +69,7 @@ export default function Register() {
           Εγγραφή
         </button>
       </form>
+
       {message && (
         <div className="mt-4 text-center text-sm font-semibold">{message}</div>
       )}

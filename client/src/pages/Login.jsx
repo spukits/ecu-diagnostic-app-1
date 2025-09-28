@@ -25,26 +25,29 @@ export default function Login() {
       if (res.ok && data.token) {
         localStorage.setItem("token", data.token);
 
-        // --- Αποθήκευση username/email ---
+        // Αποθήκευση username/email για μελλοντική χρήση
         if (data.user) {
           localStorage.setItem("username", data.user.username || "");
           localStorage.setItem("email", data.user.email || "");
         }
 
-        setMessage("✅ Επιτυχής σύνδεση! Μεταφέρεστε στην αρχική σελίδα...");
+        setMessage("✅ Σύνδεση επιτυχής!");
         setSuccess(true);
         setTimeout(() => navigate("/"), 1200);
       } else {
-        setMessage("❌ " + (data.message || "Σφάλμα σύνδεσης"));
+        setMessage("❌ " + (data.message || "Σφάλμα κατά τη σύνδεση."));
       }
     } catch {
-      setMessage("❌ Πρόβλημα σύνδεσης με τον server.");
+      setMessage("❌ Σφάλμα διακομιστή. Προσπαθήστε ξανά.");
     }
   };
 
   return (
     <div className="max-w-md mx-auto p-6 mt-10 bg-white shadow rounded">
-      <h2 className="text-2xl font-bold mb-6 text-center">Σύνδεση Χρήστη</h2>
+      <h2 className="text-2xl font-bold mb-6 text-center">
+        Σύνδεση Χρήστη
+      </h2>
+
       <form onSubmit={handleSubmit} className="space-y-4">
         <input
           name="email"
@@ -68,6 +71,7 @@ export default function Login() {
           Σύνδεση
         </button>
       </form>
+
       {message && (
         <div
           className={`mt-4 text-center text-sm font-semibold ${
@@ -77,11 +81,12 @@ export default function Login() {
           {message}
         </div>
       )}
-      {/* Κουμπί Εγγραφής κάτω από το κουμπί Σύνδεσης */}
+
+      {/* Link για Εγγραφή */}
       <div className="mt-4 text-center">
         Δεν έχετε λογαριασμό;{" "}
         <Link to="/register" className="text-blue-600 hover:underline font-semibold">
-          Εγγραφή
+          Εγγραφή εδώ
         </Link>
       </div>
     </div>
